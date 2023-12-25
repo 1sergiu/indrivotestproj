@@ -3,6 +3,7 @@ using IndrivoTestProj.Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using IndrivoTestProj.Exceptions;
 
@@ -19,12 +20,12 @@ namespace IndrivoTestProj.Data.Services
 
         public async Task AddClassifierAsync(ClassifierVM classifier, CancellationToken cancellationToken = default)
         {
-            var _classifier = new Classifier
+            var newClassifier = new Classifier
             {
                 Title = classifier.Title,
             };
 
-            _context.Classifiers.Add(_classifier);
+            _context.Classifiers.Add(newClassifier);
             await _context.SaveChangesAsync(cancellationToken);
         }
 
@@ -33,43 +34,45 @@ namespace IndrivoTestProj.Data.Services
 
         public async Task<Classifier> GetClassifierByIdAsync(Guid guid, CancellationToken cancellationToken = default)
         {
-            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == guid, cancellationToken);
+            var classifier = await _context.Classifiers
+                .SingleOrDefaultAsync(c => c.Guid == guid, cancellationToken);
 
-            if (_classifier == null)
+            if (classifier is null)
             {
                 throw new GuidNotFoundException($"Classifier with id: {guid} not found");
             }
-            return _classifier;
+
+            return classifier;
         }
 
         public async Task<Classifier> UpdateClassifierByIdAsync(Guid classifierId, ClassifierVM classifier, CancellationToken cancellationToken = default)
         {
-            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == classifierId, cancellationToken);
-            if (_classifier == null)
+            var existingClassifier = await _context.Classifiers
+                .SingleOrDefaultAsync(c => c.Guid == classifierId, cancellationToken);
+
+            if (existingClassifier is null)
             {
                 throw new GuidNotFoundException($"Classifier with id: {classifierId} not found.");
             }
-            if (_classifier != null)
-            {
-                _classifier.Title = classifier.Title;
-                await _context.SaveChangesAsync(cancellationToken);
-            }
-            return _classifier;
+
+            existingClassifier.Title = classifier.Title;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return existingClassifier;
         }
 
         public async Task DeleteClassifierByIdAsync(Guid classifierId, CancellationToken cancellationToken = default)
         {
-            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(n => n.Guid == classifierId, cancellationToken);
-            if (_classifier == null)
+            var classifierToDelete = await _context.Classifiers
+                .SingleOrDefaultAsync(n => n.Guid == classifierId, cancellationToken);
+
+            if (classifierToDelete is null)
             {
                 throw new GuidNotFoundException($"Classifier with id: {classifierId} not found.");
             }
 
-            if (_classifier != null)
-            {
-                _context.Classifiers.Remove(_classifier);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
+            _context.Classifiers.Remove(classifierToDelete);
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

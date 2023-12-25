@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using IndrivoTestProj.Data.Models;
 
 namespace IndrivoTestProj.Controllers
 {
@@ -21,23 +22,23 @@ namespace IndrivoTestProj.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllClassifiers()
+        public async Task<ActionResult<List<Classifier>>> GetAllClassifiers()
         {
             var allClassifiers = await _classifierService.GetAllClassifiersAsync();
             return Ok(allClassifiers);
         }
 
         [HttpGet("{guid}")]
-        public async Task<IActionResult> GetClassifierById(Guid guid)
+        public async Task<ActionResult<Classifier>> GetClassifierById(Guid guid)
         {
             try
             {
-                var classifierId = await _classifierService.GetClassifierByIdAsync(guid);
-                return Ok(classifierId);
+                var classifier = await _classifierService.GetClassifierByIdAsync(guid);
+                return Ok(classifier);
             }
             catch (GuidNotFoundException ex)
             {
-                return BadRequest($"{ex.Message}");
+                return NotFound(ex.Message);
             }
         }
 
@@ -45,20 +46,20 @@ namespace IndrivoTestProj.Controllers
         public async Task<IActionResult> AddClassifier([FromBody] ClassifierVM classifier)
         {
             await _classifierService.AddClassifierAsync(classifier);
-            return Ok();
+            return NoContent();
         }
 
         [HttpPut("{guid}")]
-        public async Task<IActionResult> UpdateClassifierById(Guid guid, [FromBody] ClassifierVM classifier)
+        public async Task<ActionResult<Classifier>> UpdateClassifierById(Guid guid, [FromBody] ClassifierVM classifier)
         {
             try
             {
-                var updateClassifier = await _classifierService.UpdateClassifierByIdAsync(guid, classifier);
-                return Ok(updateClassifier);
+                var updatedClassifier = await _classifierService.UpdateClassifierByIdAsync(guid, classifier);
+                return Ok(updatedClassifier);
             }
             catch (GuidNotFoundException ex)
             {
-                return BadRequest($"{ex.Message}");
+                return NotFound(ex.Message);
             }
         }
 
@@ -68,11 +69,11 @@ namespace IndrivoTestProj.Controllers
             try
             {
                 await _classifierService.DeleteClassifierByIdAsync(guid);
-                return Ok();
+                return NoContent();
             }
             catch (GuidNotFoundException ex)
             {
-                return BadRequest($"{ex.Message}");
+                return NotFound(ex.Message);
             }
         }
     }
