@@ -17,40 +17,39 @@ namespace IndrivoTestProj.Controllers
             _entityService = entityService ?? throw new ArgumentNullException(nameof(entityService));
         }
 
-        [HttpGet("get-all-entities")]
+        [HttpGet]
         public async Task<IActionResult> GetAllEntities()
         {
             var entities = await _entityService.GetAllEntitiesAsync();
             return Ok(entities);
         }
 
-        [HttpGet("get-entity-by-id/{guid}")]
+        [HttpGet("{guid}")]
         public async Task<IActionResult> GetEntityById(Guid guid)
         {
             var entity = await _entityService.GetEntityByIdAsync(guid);
             return entity != null ? Ok(entity) : NotFound();
         }
 
-        [HttpPost("add-entity")]
+        [HttpPost]
         public async Task<IActionResult> AddEntity([FromBody] EntityVM entityVM)
         {
             await _entityService.AddEntityAsync(entityVM);
             return CreatedAtAction(nameof(GetEntityById), new { guid = Guid.NewGuid() }, entityVM);
         }
 
-        [HttpPut("update-entity-by-id/{guid}")]
+        [HttpPut("{guid}")]
         public async Task<IActionResult> UpdateEntityById(Guid guid, [FromBody] EntityVM entityVM)
         {
             var updatedEntity = await _entityService.UpdateEntityByIdAsync(guid, entityVM);
             return updatedEntity != null ? Ok(updatedEntity) : NotFound();
         }
 
-        [HttpDelete("delete-entity-by-id/{guid}")]
+        [HttpDelete("{guid}")]
         public async Task<IActionResult> DeleteEntityById(Guid guid)
         {
             await _entityService.DeleteEntityByIdAsync(guid);
             return NoContent();
         }
     }
-
 }

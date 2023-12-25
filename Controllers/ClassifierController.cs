@@ -19,35 +19,35 @@ namespace IndrivoTestProj.Controllers
             _classifierService = classifierService;
         }
 
-        [HttpGet("get-all-classifiers")]
+        [HttpGet]
         public async Task<IActionResult> GetAllClassifiers()
         {
             var allClassifiers = await _classifierService.GetAllClassifiersAsync();
             return Ok(allClassifiers);
         }
 
-        [HttpGet("get-classifier-by-id")]
+        [HttpGet("{guid}")]
         public async Task<IActionResult> GetClassifierById(Guid guid)
         {
             var classifierId = await _classifierService.GetClassifierByIdAsync(guid);
             return Ok(classifierId);
         }
 
-        [HttpPost("add-type")]
+        [HttpPost]
         public async Task<IActionResult> AddClassifier([FromBody] ClassifierVM classifier)
         {
             await _classifierService.AddClassifierAsync(classifier);
             return Ok();
         }
 
-        [HttpPut("update-classifier-by-id/{guid}")]
+        [HttpPut("{guid}")]
         public async Task<IActionResult> UpdateClassifierById(Guid guid, [FromBody] ClassifierVM classifier)
         {
             var updateClassifier = await _classifierService.UpdateClassifierByIdAsync(guid, classifier);
             return Ok(updateClassifier);
         }
 
-        [HttpDelete("delete-classifier-by-id/{guid}")]
+        [HttpDelete("{guid}")]
         public async Task<IActionResult> DeleteClassifierById(Guid guid)
         {
             await _classifierService.DeleteClassifierByIdAsync(guid);
