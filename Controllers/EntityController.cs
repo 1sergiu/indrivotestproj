@@ -2,8 +2,10 @@
 using IndrivoTestProj.Data.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using IndrivoTestProj.Exceptions;
+using IndrivoTestProj.Data.Models;
 
 namespace IndrivoTestProj.Controllers
 {
@@ -18,71 +20,87 @@ namespace IndrivoTestProj.Controllers
             _entityService = entityService ?? throw new ArgumentNullException(nameof(entityService));
         }
 
+        private IActionResult HandleException(Exception ex)
+        {
+            if (ex is GuidNotFoundException)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+
+            return StatusCode(500, "Internal Server Error");
+        }
+
         [HttpGet]
-        public async Task<IActionResult> GetAllEntities()
+        public async Task<ActionResult<IEnumerable<Entity>>> GetAllEntitiesAsync()
         {
             var entities = await _entityService.GetAllEntitiesAsync();
             return Ok(entities);
         }
 
         [HttpGet("{guid}")]
-        public async Task<IActionResult> GetEntityById(Guid guid)
+        public async Task<IActionResult> GetEntityByIdAsync(Guid guid)
         {
             try
             {
                 var entity = await _entityService.GetEntityByIdAsync(guid);
                 return entity != null ? Ok(entity) : NotFound();
             }
-            catch (GuidNotFoundException ex)
+            catch (Exception ex)
             {
-                return BadRequest($"{ex.Message}");
+                return HandleException(ex);
             }
-
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEntity([FromBody] EntityVM entityVM)
+        public async Task<IActionResult> AddEntityAsync([FromBody] EntityVM entityVM)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 await _entityService.AddEntityAsync(entityVM);
-                return CreatedAtAction(nameof(GetEntityById), new { guid = Guid.NewGuid() }, entityVM);
+                return CreatedAtAction(nameof(GetEntityByIdAsync), new { guid = Guid.NewGuid() }, entityVM);
             }
-            catch (GuidNotFoundException ex)
+            catch (Exception ex)
             {
-                return BadRequest($"{ex.Message}");
+                return HandleException(ex);
             }
-
         }
 
         [HttpPut("{guid}")]
-        public async Task<IActionResult> UpdateEntityById(Guid guid, [FromBody] EntityVM entityVM)
+        public async Task<IActionResult> UpdateEntityByIdAsync(Guid guid, [FromBody] EntityVM entityVM)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 var updatedEntity = await _entityService.UpdateEntityByIdAsync(guid, entityVM);
                 return updatedEntity != null ? Ok(updatedEntity) : NotFound();
             }
-            catch (GuidNotFoundException ex)
+            catch (Exception ex)
             {
-                return BadRequest($"{ex.Message}");
+                return HandleException(ex);
             }
-
         }
 
         [HttpDelete("{guid}")]
-        public async Task<IActionResult> DeleteEntityById(Guid guid)
+        public async Task<IActionResult> DeleteEntityByIdAsync(Guid guid)
         {
             try
             {
                 await _entityService.DeleteEntityByIdAsync(guid);
                 return NoContent();
             }
-            catch (GuidNotFoundException ex)
+            catch (Exception ex)
             {
-                return BadRequest($"{ex.Message}");
+                return HandleException(ex);
             }
         }
     }
-
 }

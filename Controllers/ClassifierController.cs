@@ -21,59 +21,69 @@ namespace IndrivoTestProj.Controllers
             _classifierService = classifierService;
         }
 
+        private ActionResult HandleException(Exception ex)
+        {
+            if (ex is GuidNotFoundException)
+            {
+                return NotFound(ex.Message);
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+        }
+
         [HttpGet]
-        public async Task<ActionResult<List<Classifier>>> GetAllClassifiers()
+        public async Task<ActionResult<List<Classifier>>> GetAllClassifiersAsync()
         {
             var allClassifiers = await _classifierService.GetAllClassifiersAsync();
             return Ok(allClassifiers);
         }
 
         [HttpGet("{guid}")]
-        public async Task<ActionResult<Classifier>> GetClassifierById(Guid guid)
+        public async Task<ActionResult<Classifier>> GetClassifierByIdAsync(Guid guid)
         {
             try
             {
                 var classifier = await _classifierService.GetClassifierByIdAsync(guid);
                 return Ok(classifier);
             }
-            catch (GuidNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return HandleException(ex);
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddClassifier([FromBody] ClassifierVM classifier)
+        public async Task<IActionResult> AddClassifierAsync([FromBody] ClassifierVM classifier)
         {
             await _classifierService.AddClassifierAsync(classifier);
             return NoContent();
         }
 
         [HttpPut("{guid}")]
-        public async Task<ActionResult<Classifier>> UpdateClassifierById(Guid guid, [FromBody] ClassifierVM classifier)
+        public async Task<ActionResult<Classifier>> UpdateClassifierByIdAsync(Guid guid, [FromBody] ClassifierVM classifier)
         {
             try
             {
                 var updatedClassifier = await _classifierService.UpdateClassifierByIdAsync(guid, classifier);
                 return Ok(updatedClassifier);
             }
-            catch (GuidNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return HandleException(ex);
             }
         }
 
         [HttpDelete("{guid}")]
-        public async Task<IActionResult> DeleteClassifierById(Guid guid)
+        public async Task<IActionResult> DeleteClassifierByIdAsync(Guid guid)
         {
             try
             {
                 await _classifierService.DeleteClassifierByIdAsync(guid);
                 return NoContent();
             }
-            catch (GuidNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return HandleException(ex);
             }
         }
     }
