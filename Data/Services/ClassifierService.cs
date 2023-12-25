@@ -16,7 +16,7 @@ namespace IndrivoTestProj.Data.Services
             _context = context;
         }
 
-        public async Task AddClassifierAsync(ClassifierVM classifier)
+        public async Task AddClassifierAsync(ClassifierVM classifier, CancellationToken cancellationToken = default)
         {
             var _classifier = new Classifier
             {
@@ -24,31 +24,33 @@ namespace IndrivoTestProj.Data.Services
             };
 
             _context.Classifiers.Add(_classifier);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<List<Classifier>> GetAllClassifiersAsync() => await _context.Classifiers.ToListAsync();
+        public async Task<List<Classifier>> GetAllClassifiersAsync(CancellationToken cancellationToken = default)
+            => await _context.Classifiers.ToListAsync(cancellationToken);
 
-        public async Task<Classifier> GetClassifierByIdAsync(Guid guid) => await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == guid);
+        public async Task<Classifier> GetClassifierByIdAsync(Guid guid, CancellationToken cancellationToken = default)
+            => await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == guid, cancellationToken);
 
-        public async Task<Classifier> UpdateClassifierByIdAsync(Guid classifierId, ClassifierVM classifier)
+        public async Task<Classifier> UpdateClassifierByIdAsync(Guid classifierId, ClassifierVM classifier, CancellationToken cancellationToken = default)
         {
-            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == classifierId);
+            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == classifierId, cancellationToken);
             if (_classifier != null)
             {
                 _classifier.Title = classifier.Title;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
             return _classifier;
         }
 
-        public async Task DeleteClassifierByIdAsync(Guid classifierId)
+        public async Task DeleteClassifierByIdAsync(Guid classifierId, CancellationToken cancellationToken = default)
         {
-            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(n => n.Guid == classifierId);
+            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(n => n.Guid == classifierId, cancellationToken);
             if (_classifier != null)
             {
                 _context.Classifiers.Remove(_classifier);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
     }

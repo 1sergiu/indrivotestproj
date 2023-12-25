@@ -17,7 +17,7 @@ namespace IndrivoTestProj.Data.Services
             _context = context;
         }
 
-        public async Task AddEntityAsync(EntityVM entity)
+        public async Task AddEntityAsync(EntityVM entity, CancellationToken cancellationToken = default)
         {
             //Verifing if Classfier exists
             var classifierExists = await _context.Classifiers.AnyAsync(c => c.Guid == entity.TypeGuid);
@@ -34,33 +34,34 @@ namespace IndrivoTestProj.Data.Services
             };
 
             _context.Entities.Add(_entity);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<List<Entity>> GetAllEntitiesAsync() => await _context.Entities.ToListAsync();
+        public async Task<List<Entity>> GetAllEntitiesAsync(CancellationToken cancellationToken = default)
+            => await _context.Entities.ToListAsync(cancellationToken);
 
-        public async Task<Entity> GetEntityByIdAsync(Guid guid) => await _context.Entities.FirstOrDefaultAsync(n => n.Guid == guid);
+        public async Task<Entity> GetEntityByIdAsync(Guid guid, CancellationToken cancellationToken = default)
+            => await _context.Entities.FirstOrDefaultAsync(n => n.Guid == guid, cancellationToken);
 
-        public async Task<Entity> UpdateEntityByIdAsync(Guid entityId, EntityVM entity)
+        public async Task<Entity> UpdateEntityByIdAsync(Guid entityId, EntityVM entity, CancellationToken cancellationToken = default)
         {
-            var _entity = await _context.Entities.FirstOrDefaultAsync(c => c.Guid == entityId);
+            var _entity = await _context.Entities.FirstOrDefaultAsync(c => c.Guid == entityId, cancellationToken);
             if (_entity != null)
             {
                 _entity.Title = entity.Title;
                 _entity.Description = entity.Description;
                 _entity.TypeGuid = entity.TypeGuid;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
             return _entity;
         }
-
-        public async Task DeleteEntityByIdAsync(Guid entityId)
+        public async Task DeleteEntityByIdAsync(Guid entityId, CancellationToken cancellationToken = default)
         {
-            var _entity = await _context.Entities.FirstOrDefaultAsync(n => n.Guid == entityId);
+            var _entity = await _context.Entities.FirstOrDefaultAsync(n => n.Guid == entityId, cancellationToken);
             if (_entity != null)
             {
                 _context.Entities.Remove(_entity);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
     }
