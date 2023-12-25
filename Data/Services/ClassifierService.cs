@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using IndrivoTestProj.Exceptions;
 
 namespace IndrivoTestProj.Data.Services
 {
@@ -31,11 +32,23 @@ namespace IndrivoTestProj.Data.Services
             => await _context.Classifiers.ToListAsync(cancellationToken);
 
         public async Task<Classifier> GetClassifierByIdAsync(Guid guid, CancellationToken cancellationToken = default)
-            => await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == guid, cancellationToken);
+        {
+            var _classifier = await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == guid, cancellationToken);
+
+            if (_classifier == null)
+            {
+                throw new GuidNotFoundException($"Classifier with id: {guid} not found");
+            }
+            return _classifier;
+        }
 
         public async Task<Classifier> UpdateClassifierByIdAsync(Guid classifierId, ClassifierVM classifier, CancellationToken cancellationToken = default)
         {
             var _classifier = await _context.Classifiers.FirstOrDefaultAsync(c => c.Guid == classifierId, cancellationToken);
+            if (_classifier == null)
+            {
+                throw new GuidNotFoundException($"Classifier with id: {classifierId} not found.");
+            }
             if (_classifier != null)
             {
                 _classifier.Title = classifier.Title;
@@ -47,6 +60,11 @@ namespace IndrivoTestProj.Data.Services
         public async Task DeleteClassifierByIdAsync(Guid classifierId, CancellationToken cancellationToken = default)
         {
             var _classifier = await _context.Classifiers.FirstOrDefaultAsync(n => n.Guid == classifierId, cancellationToken);
+            if (_classifier == null)
+            {
+                throw new GuidNotFoundException($"Classifier with id: {classifierId} not found.");
+            }
+
             if (_classifier != null)
             {
                 _context.Classifiers.Remove(_classifier);

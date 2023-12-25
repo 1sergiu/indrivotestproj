@@ -1,5 +1,6 @@
 ﻿using IndrivoTestProj.Data.Services;
 using IndrivoTestProj.Data.ViewModels;
+using IndrivoTestProj.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -29,8 +30,15 @@ namespace IndrivoTestProj.Controllers
         [HttpGet("{guid}")]
         public async Task<IActionResult> GetClassifierById(Guid guid)
         {
-            var classifierId = await _classifierService.GetClassifierByIdAsync(guid);
-            return Ok(classifierId);
+            try
+            {
+                var classifierId = await _classifierService.GetClassifierByIdAsync(guid);
+                return Ok(classifierId);
+            }
+            catch (GuidNotFoundException ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
         }
 
         [HttpPost]
@@ -43,15 +51,29 @@ namespace IndrivoTestProj.Controllers
         [HttpPut("{guid}")]
         public async Task<IActionResult> UpdateClassifierById(Guid guid, [FromBody] ClassifierVM classifier)
         {
-            var updateClassifier = await _classifierService.UpdateClassifierByIdAsync(guid, classifier);
-            return Ok(updateClassifier);
+            try
+            {
+                var updateClassifier = await _classifierService.UpdateClassifierByIdAsync(guid, classifier);
+                return Ok(updateClassifier);
+            }
+            catch (GuidNotFoundException ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
         }
 
         [HttpDelete("{guid}")]
         public async Task<IActionResult> DeleteClassifierById(Guid guid)
         {
-            await _classifierService.DeleteClassifierByIdAsync(guid);
-            return Ok();
+            try
+            {
+                await _classifierService.DeleteClassifierByIdAsync(guid);
+                return Ok();
+            }
+            catch (GuidNotFoundException ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
         }
     }
 }
